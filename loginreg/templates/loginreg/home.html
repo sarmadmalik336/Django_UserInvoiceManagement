@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Bootstrap icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <title> HOME - {% if user %}{{user}}{% endif %}</title>
+    <style> 
+        body{
+            font-family: 'Poppins', sans-serif;
+        }       
+        #serch-invoice input{
+            height: 40px;
+            margin: 0px 10px;
+            padding: 0px 5px;
+            border-radius: 5px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">USER HOME</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/logout">Logout <span class="sr-only">(current)</span></a>
+            </li>
+            {% if status %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/change_pass"> Change_Password </a>
+                </li>
+            {% endif %}
+          </ul>
+        </div>
+    </nav>
+
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show d-flex justify-content-between m-5" role="alert">
+            <h5 class="mx-3">{{ message }}</h5>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="main container-fluid px-md-5 px-1">
+        {% if status %}
+            <div class="msg-container container my-5">
+                <div class="container msg-container text-center my-3">
+                    <h3 class="text-center" style="{% if status %}color: green;{% else %}color: red;{% endif %}">
+                        
+                        <a href="create_invoice">Create New Invoice</a>
+                        
+                    </h3>
+                </div>
+            </div>
+
+            <h3 class="text-center my-3">Your Invoices</h3>
+            <div class="row justify-content-between align-items-center">
+                <form method="get" action="{% url 'home' %}" id="serch-invoice" class="d-flex justify-content-start my-5 col-md-7" autocomplete="off">
+                    {{filter.form}}
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Apply Filter</button>
+                </form>
+                <nav class="col-md-4 my-5" aria-label="...">
+                    <ul class="pagination m-0">
+                        {% if invoices.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if searched_customer %}&customer_name={{searched_customer}}{% endif %}" tabindex="-1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{invoices.previous_page_number}}{% if searched_customer %}&customer_name={{searched_customer}}{% endif %}" tabindex="-1">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        {% for n in totalPageList %}
+                            {% if n >= invoices.number|add:"-1" and n <= invoices.number|add:"1" %}
+                                <li class="page-item {% if n == invoices.number %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ n }}{% if searched_customer %}&customer_name={{searched_customer}}{% endif %}">{{ n }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if invoices.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{invoices.next_page_number}}{% if searched_customer %}&customer_name={{searched_customer}}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{lastpage}}{% if searched_customer %}&customer_name={{searched_customer}}{% endif %}">Last</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover mb-5">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Invoice No.</th>
+                            <th>Create Date</th>
+                            <th>Company Name</th>
+                            <th>Email</th>
+                            <th>Invoice Total</th>
+                            <th>Created By</th>
+                            <th>Edit</th>
+                            <th>Preview</th>
+                            <th>Download</th>
+                            <th>Send Attachment</th>
+                            <th class="text-danger">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                            <tr>
+                                <td>{{ invoice.id }}</td>
+                                <td>{{ invoice.created_at|date:"d-m-Y" }}</td>
+                                <td>{{ invoice.customer_name }}</td>
+                                <td>{{ invoice.email }}</td>
+                                <td>{{ invoice.all_total }}</td>
+                                <td>{{ invoice.created_by.name }}</td>
+                                <td><a href="{% url 'update_invoice' invoice.id %}" class="text-decoration-none"><i class="bi bi-pencil-square text-primary"></i></a></td>
+                                <td><a href="{% url 'pdf_view' invoice.id %}?preview=true" class="text-decoration-none" target=_blank><i class="bi bi-eye text-primary"></i></a></td>
+                                <td><a href="{% url 'pdf_view' invoice.id %}?download=true" class="text-decoration-none"><i class="bi bi-download text-primary"></i></a></td>
+                                <td><a href="{% url 'send_email' invoice.id %}?send_email=true" class="text-decoration-none"><i class="bi bi-envelope text-primary"></i></a></td>
+                                <td><a href="{% url 'delete_invoice' invoice.id %}" class="text-decoration-none text-danger"><i class="bi bi-trash-fill"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <h3 class="text-danger m-5">You are an Inactive User! Wait for ADMIN for making you active</h3>
+        {% endif %}          
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  
+</body>
+</html>

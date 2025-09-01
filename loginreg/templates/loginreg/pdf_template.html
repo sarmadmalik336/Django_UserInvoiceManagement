@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Table</title>
+      <link
+         rel="stylesheet"
+         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+         crossorigin="anonymous"
+         />
+      <style>
+         
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #fafafa;
+        }
+        .table_data {
+            margin: 10px;
+        }
+        .table-bordered {
+            border: 2px solid black;
+        }
+        .table-bordered th,
+         .table-bordered td {
+            border: 1px solid black;
+        }
+        .table-bordered thead th {
+            border-bottom: 2px solid black;
+        }
+        #header_content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        .table_data {
+            height: auto;
+            padding: 5px;
+        }
+        .default {
+            font-size: medium;
+            font-weight: 600;
+            line-height: 0;
+        }
+        .table td, .table th {
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            vertical-align: top;
+            border-top: 0px solid #dee2e6; 
+         }
+      </style>
+   </head>
+   <body>
+      <div class="table_data">
+         <div id="header_content">            
+            <img src="https://yt3.googleusercontent.com/M4Pmr-K8s_K3ZQ8sB67zMYssvHFNZgVqgJ5eQIKqTCaBF8N4qd59RuEZen2jZm7m0kgj1SAS4Q=s176-c-k-c0x00ffffff-no-rj" width="150px" alt="LOGO IMG" />
+            
+            <h2 style="font-size: 17px;">INVOICE</h2>
+            <h6 style="font-size: 13px;">C-702, Atharvaved, Vedant CHS, Wayale Nagar <br>
+            Kalyan (W), Thane, Maharashtra, Pincode - 421301 <br>
+            Email: <a href="mailto:support@aaryansh.co.in"> support@aaryansh.co.in</a> <br>
+            Tel: +91 70451 84111 | +91 98699 66737</h6>
+         </div>
+         <section id="receiver_data">
+            <div id="receiver_child1">
+               <h3 style="font-size: 13px;">To,</h3>
+               <h6 style="font-size: 13px;">RECEIVER (BILL TO) : </h6>
+               <!-- Here inn the name we have to take the name & address form the invoice -->
+               <p style="font-size: 13px;">
+                  <span style="font-weight: bold; font-size: 15px;"> Name : </span>{{ invoice.customer_name }} <br >
+                  <span style="font-weight: bold; font-size: 15px;">Billing Address : </span>
+                  {{ invoice.address_line1 }},
+                  {{ invoice.address_line2 }}, 
+                  {{ invoice.city }} , {{invoice.zip_code}},
+                  {{ invoice.state }} , {% if invoice.country == 'IN' %}INDIA {% else %} {{invoice.country}} {% endif %}
+               </p>            
+               <p style="font-size: 13px;">  
+                  <span style="font-weight: bold; font-size: 15px;">Invoice No. : </span> {{invoice.id}} <br>
+                  <span style="font-weight: bold; font-size: 15px;">Invoice Date : </span> {{invoice_date}}
+               </p>
+            </div>
+         </section>
+         <table class="table table-bordered">
+            <thead>
+               <tr>
+                  <th style="font-size: 14px; width: 50; text-align: center;">Sr No.</th>
+                  <th style="font-size: 14px; width: 60px; text-align: center;">Item Code</th>
+                  <th style="font-size: 14px; width: 540px; text-align: center;">Item Name</th>
+                  <th style="font-size: 14px; width: 100px; text-align: center;">Quantity</th>
+                  <th style="font-size: 14px; width: 200px; text-align: center;">Price (Rs.)</th>
+                  <th style="font-size: 14px; width: 200px; text-align: center;">Actual Amount (Rs.)</th>
+               </tr>
+            </thead>
+            <tbody>
+               {% for item in items %}
+                  <tr>
+                     <td style="font-size: 12px; text-align: center">{{ forloop.counter }}</td>
+                     <td style="font-size: 12px; text-align: center">{{ item.item_no }}</td>
+                     <td style="font-size: 12px; text-align: center">{{ item.item_name }}</td>
+                     <td style="font-size: 12px; text-align: center">{{ item.quantity }}</td>
+                     <td style="font-size: 12px; text-align: center">{{ item.price }}</td>
+                     <td style="font-size: 12px; text-align: center">{{ item.total }}</td>
+                  </tr>
+               {% endfor %}
+               <tr class="default">
+                  <td colspan="5" style="text-align: right; font-size: 14px;">Subtotal</td>
+                  <td style="font-weight: normal; font-size: 12px; text-align: center;">{{invoice.subtotal}}</td>
+               </tr>
+               <tr class="default">
+                  <td colspan="5" style="text-align: right; font-size: 14px;">GST (%)</td>
+                  <td style="font-weight: normal; font-size: 12px; text-align: center;">{{invoice.gst}}</td>
+               </tr>
+               <tr class="default">
+                  <td colspan="5" style="text-align: right; font-size: 14px;">GST Amount (Rs.)</td>
+                  <td style="font-weight: normal; font-size: 12px; text-align: center;">{{invoice.gst_rate}}</td>
+               </tr>
+               <tr class="default">
+                  <td colspan="5" style="text-align: right; font-size: 14px;">Total (Rs.)</td>
+                  <td style="font-weight: normal; font-size: 12px; text-align: center;">{{invoice.all_total}}</td>
+               </tr>
+               <tr class="default">
+                  <td colspan="5" style="text-align: right; font-size: 14px;">Amount Paid (Rs.)</td>
+                  <td style="font-weight: normal; font-size: 12px; text-align: center;">{{invoice.amount_paid}}</td>
+               </tr>
+               <tr class="default">
+                  <td colspan="5" style="text-align: right; font-size: 14px;">Amount Due (Rs.)</td>
+                  <td style="font-weight: normal; font-size: 12px; text-align: center;">{{invoice.amount_due}}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <script
+         src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+         crossorigin="anonymous"
+         ></script>
+      <script
+         src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV6ZywEzx68nLIx0PZB7Kf/Kt6eUSoFt0En5Xp1"
+         crossorigin="anonymous"
+         ></script>
+      <script
+         src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+         crossorigin="anonymous"
+         ></script>
+   </body>
+</html>

@@ -1,0 +1,346 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- jquery link -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <title> HOME - {% if user %}{{user}}{% endif %}</title>
+
+    <style>
+      .main{
+        background-color: white;
+      }
+
+      .invoice {
+          padding: 20px;
+          border-radius: 10px;
+          display: flex;
+          flex-direction: column; /* Display children vertically */
+          align-items: center; /* Center align items horizontally */
+      }
+  
+      .form-group {
+          margin-bottom: 20px;
+          width: 100%;
+          display: flex;
+          flex-direction: row; /* Display children horizontally */
+          justify-content: space-between; /* Space between children */
+      }
+
+      .form-control , #id_country{
+        height: 50px;
+        border-radius: 5px;
+      }
+  
+      .form-group label {
+          width: 30%; /* Adjust label width as needed */
+          margin-right: 10px; /* Add spacing between label and input */
+      }
+  
+      .form-group input, .form-group select, .form-group textarea {
+          width: 60%; /* Adjust input width as needed */
+      }
+  
+      .add-item, .submit-btn {
+          margin-top: 20px; /* Add margin between buttons and form fields */
+      }
+  </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">USER HOME</a>
+        
+    </nav>
+
+    <div class="main">
+        <div class="invoice-container ">
+            <div class=" invoice form text-center">
+              <h2 class="text-center mb-5">Update Invoice - {{invoice_id}}</h2>
+              <form method="post" enctype="multipart/form-data" id="invoice_form" class="main-invoice-form text-center">
+
+                {% csrf_token %}
+
+                {{ item_formset.management_form }}
+                <script type="text/html" id="formset-items-template">  // id="inlineformsetname-template"
+                  // id='inlineformsetname-__prefix__' 
+                  <tr id="formset-items-__prefix__" class= hide_all>
+                      {% for fields in item_formset.empty_form.hidden_fields %}
+                          {{ fields }}
+                      {% endfor %}
+                  
+                      {% for fields in item_formset.empty_form.visible_fields %}
+                          <td>{{fields}}</td>
+                      {% endfor %}
+                  </tr>
+                </script>
+                
+                <div class="row justify-content-center align-items-start">
+                    <div class="col-md-6 mx-md-5 mx-0">
+                        <div class="px-3 mb-3" style="text-align: start; color: rgb(46, 103, 103);">
+                            <h4>From,</h4>
+                            <h6>Aaryansh Electricals <br>C-702, Atharvaved, Vendant CHS, Wayale nagar, kalyan(W), <br>Thane - 421301, Maharashtra, India <br>7045184111 <br><a href="mailto:support@aaryansh.co.in" target="_blank">support@aaryansh.co.in</a> </h6>
+                        </div>
+                        <div class="table-responsive pb-5" style="height: fit-content; border-radius: 10px; background-color: rgb(239, 238, 238);">
+                            <div class="card-header card-header-secondary">
+                                <h4 class="card-title">Add Items</h4>
+                            </div>
+                            <table class="table card-body">
+                                <thead class="text-secondary">
+                                    <th>Item No. <span style="color: red;" class="required">*</span></th>
+                                    <th>Item Name <span style="color: red;" class="required">*</span></th>
+                                    <th>Quantity <span style="color: red;" class="required">*</span></th>
+                                    <th>Price <span style="color: red;" class="required">*</span></th>
+                                    <th class="text-danger">Delete?</th>
+                                </thead>
+                                <tbody id="formset-items">  <!-- id="item-inlineformsetname" -->
+                                    <!-- formset non forms errors -->
+                                    {% for error in item_formset.non_form_errors %}
+                                        <span style="color: red">{{ error }}</span>
+                                    {% endfor %}
+                                    {% for formss in item_formset %}
+                                        {{ formss.management_form }}
+                                        <tr id="formset-items-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                                            {{ formss.id }}
+                                            {% for field in formss.visible_fields %}
+                                                <td>
+                                                    {{field}}
+                                                    {% for error in field.errors %}
+                                                        <span style="color: red">{{ error }}</span>
+                                                    {% endfor %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <a href="#" id="add-items-button" class="btn btn-primary add-items">Add More</a> <!-- id="add-inlineformsetname-button" -->
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <h4 class="px-3 pb-3" style="text-align: start; color: rgb(46, 103, 103);">To,</h4>
+                        <!-- main form start - in our case product form -->
+                        <div class="pt-4 pb-2" style="border-radius: 10px; background-color: rgb(239, 238, 238);">
+                            
+                            <div>
+                                <div class="form-group card-body d-flex justify-content-center align-items-center">
+                                    <label>{{ invoice_form.customer_name.label }} 
+                                        {% if invoice_form.customer_name.field.required %}
+                                            <span style="color: red;" class="required">*</span>
+                                        {% endif %}
+                                    </label>                                    
+                                    {{ invoice_form.customer_name }}
+                                    {% if invoice_form.customer_name.help_text %}
+                                        <small style="color: grey">{{ invoice_form.customer_name.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in invoice_form.customer_name.errors %}
+                                        <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group card-body d-flex justify-content-center align-items-center">
+                                    <label>{{ invoice_form.email.label }} 
+                                        {% if invoice_form.email.field.required %}
+                                            <span style="color: red;" class="required">*</span>
+                                        {% endif %}
+                                    </label>                                    
+                                    {{ invoice_form.email }}
+                                    {% if invoice_form.email.help_text %}
+                                        <small style="color: grey">{{ invoice_form.email.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in invoice_form.email.errors %}
+                                        <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group card-body d-flex justify-content-center align-items-center">
+                                    <label>{{ invoice_form.gst_no.label }} 
+                                        {% if invoice_form.gst_no.field.required %}
+                                            <span style="color: red;" class="required">*</span>
+                                        {% endif %}
+                                    </label>                                    
+                                    {{ invoice_form.gst_no }}
+                                    {% if invoice_form.gst_no.help_text %}
+                                        <small style="color: grey">{{ invoice_form.gst_no.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in invoice_form.gst_no.errors %}
+                                        <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <hr class="bg-primary">                                    
+                                    <div class="form-group card-body d-flex justify-content-center align-items-center mb-0 pt-0 pb-1">
+                                        <label>{{ invoice_form.address_line1.label }} 
+                                            {% if invoice_form.address_line1.field.required %}
+                                                <span style="color: red;" class="required">*</span>
+                                            {% endif %}
+                                        </label>                                    
+                                        {{ invoice_form.address_line1 }}
+                                        {% if invoice_form.address_line1.help_text %}
+                                            <small style="color: grey">{{ invoice_form.address_line1.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in invoice_form.address_line1.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group card-body d-flex justify-content-center align-items-center mb-0 pt-0 pb-1">
+                                        <label>{{ invoice_form.address_line2.label }} 
+                                            {% if invoice_form.address_line2.field.required %}
+                                                <span style="color: red;" class="required">*</span>
+                                            {% endif %}
+                                        </label>                                    
+                                        {{ invoice_form.address_line2 }}
+                                        {% if invoice_form.address_line2.help_text %}
+                                            <small style="color: grey">{{ invoice_form.address_line2.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in invoice_form.address_line2.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group card-body d-flex justify-content-center align-items-center mb-0 pt-0 pb-1">
+                                        <label>{{ invoice_form.city.label }} 
+                                            {% if invoice_form.city.field.required %}
+                                                <span style="color: red;" class="required">*</span>
+                                            {% endif %}
+                                        </label>                                    
+                                        {{ invoice_form.city }}
+                                        {% if invoice_form.city.help_text %}
+                                            <small style="color: grey">{{ invoice_form.city.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in invoice_form.city.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group card-body d-flex justify-content-center align-items-center mb-0 pt-0 pb-1">
+                                        <label>{{ invoice_form.state.label }} 
+                                            {% if invoice_form.state.field.required %}
+                                                <span style="color: red;" class="required">*</span>
+                                            {% endif %}
+                                        </label>                                    
+                                        {{ invoice_form.state }}
+                                        {% if invoice_form.state.help_text %}
+                                            <small style="color: grey">{{ invoice_form.state.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in invoice_form.state.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group card-body d-flex justify-content-center align-items-center mb-0 pt-0 pb-1">
+                                        <label>{{ invoice_form.zip_code.label }} 
+                                            {% if invoice_form.zip_code.field.required %}
+                                                <span style="color: red;" class="required">*</span>
+                                            {% endif %}
+                                        </label>                                    
+                                        {{ invoice_form.zip_code }}
+                                        {% if invoice_form.zip_code.help_text %}
+                                            <small style="color: grey">{{ invoice_form.zip_code.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in invoice_form.zip_code.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group card-body d-flex justify-content-center align-items-center mb-0 pt-0 pb-1">
+                                        <label>{{ invoice_form.country.label }} 
+                                            {% if invoice_form.country.field.required %}
+                                                <span style="color: red;" class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    
+                                        {{ invoice_form.country }}
+                                        
+                                        {% if invoice_form.country.help_text %}
+                                            <small style="color: grey">{{ invoice_form.country.help_text }}</small>
+                                        {% endif %}
+                                    
+                                        {% for error in invoice_form.country.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                <hr class="bg-primary">
+                                <div class="form-group card-body d-flex justify-content-center align-items-center">
+                                    <label>{{ invoice_form.gst.label }} 
+                                        {% if invoice_form.gst.field.required %}
+                                            <span style="color: red;" class="required">*</span>
+                                        {% endif %}
+                                    </label>                                    
+                                    {{ invoice_form.gst }}
+                                    {% if invoice_form.gst.help_text %}
+                                        <small style="color: grey">{{ invoice_form.gst.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in invoice_form.gst.errors %}
+                                        <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group card-body d-flex justify-content-center align-items-center">
+                                    <label>{{ invoice_form.amount_paid.label }} 
+                                        {% if invoice_form.amount_paid.field.required %}
+                                            <span style="color: red;" class="required">*</span>
+                                        {% endif %}
+                                    </label>                                    
+                                    {{ invoice_form.amount_paid }}
+                                    {% if invoice_form.amount_paid.help_text %}
+                                        <small style="color: grey">{{ invoice_form.amount_paid.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in invoice_form.amount_paid.errors %}
+                                        <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group card-body d-flex justify-content-center align-items-center">
+                                    <label>{{ invoice_form.note.label }} 
+                                        {% if invoice_form.note.field.required %}
+                                            <span style="color: red;" class="required">*</span>
+                                        {% endif %}
+                                    </label>                                    
+                                    {{ invoice_form.note }}
+                                    {% if invoice_form.note.help_text %}
+                                        <small style="color: grey">{{ invoice_form.note.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in invoice_form.note.errors %}
+                                        <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5" >
+                    <button type="submit" class="btn btn-success px-5 text-center" style="width: fit-content;">Save</button>
+                </div>
+              </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script>
+
+      $(document).ready(function() {
+        // when user clicks add more btn of variants
+          $('.add-items').click(function(ev) {
+              ev.preventDefault();
+              var count = $('#formset-items').children().length;
+              var tmplMarkup = $('#formset-items-template').html();
+              var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+              $('#formset-items').append(compiledTmpl);
+      
+              // update form count
+              $('#id_items-TOTAL_FORMS').attr('value', count+1);
+          });
+      });
+
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
